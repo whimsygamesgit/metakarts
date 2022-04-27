@@ -1,13 +1,3 @@
-async function metamaskSign(jsString){
-    console.log(jsString);
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts'});
-    const defaultAccount = accounts[0];
-    console.info(defaultAccount);
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    var signedMessage = await signer.signMessage(jsString);
-    console.log(signedMessage);
-    return JSON.stringify({"account": defaultAccount, "sign": signedMessage});
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:de525b60a0cce46bbc775fe64439492e3fbe6f406d62ee94641e51dd691f0be7
+size 515
