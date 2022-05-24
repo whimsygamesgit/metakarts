@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | Metakarts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MetaKarts</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
 	<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
@@ -11,20 +12,17 @@
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=1280 height=720></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
+      <canvas id="unity-canvas"></canvas>
+    </div>
+    <div id="unity-loading-bar">
+      <div id="unity-logo"></div>
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
       </div>
       <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-webgl-logo"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Metakarts</div>
-      </div>
     </div>
+
+    <div id="unity-fullscreen-button" style="display: none;"></div>
     <script>
       var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
@@ -33,6 +31,21 @@
       var fullscreenButton = document.querySelector("#unity-fullscreen-button");
       var warningBanner = document.querySelector("#unity-warning");
       var unityGame;
+
+      const canFullscreen = (function() {
+        for (const key of [
+            'exitFullscreen',
+            'webkitExitFullscreen',
+            'webkitCancelFullScreen',
+            'mozCancelFullScreen',
+            'msExitFullscreen',
+          ]) {
+          if (key in document) {
+            return true;
+          }
+        }
+        return false;
+      }());
 
       async function ConnectMetamask(phrase){
         if(checkMetamaskInstalled()) {
@@ -82,6 +95,32 @@
         updateBannerVisibility();
       }
 
+
+
+
+      function resizeCanvas() {
+        var width = canvas.clientWidth;
+        var height = canvas.clientHeight;
+        if (canvas.width != width ||
+            canvas.height != height) {
+          canvas.width = width;
+          canvas.height = height;
+
+          // in this case just render when the window is resized.
+
+        }
+      }
+
+      function main() {
+
+
+        resizeCanvas();
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      main();
+
+      const hideFullScreenButton = "";
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/build.loader.js";
       var config = {
@@ -91,8 +130,7 @@
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Whimsy Games",
         productName: "MetaKarts",
-        productVersion: "0.1.2",
-        showBanner: unityShowBanner,
+        productVersion: "0.1.6",
       };
 
       // By default Unity keeps WebGL canvas render target size matched with
@@ -119,12 +157,13 @@
         canvas.style.height = window.innerHeight + 'px';
 
         unityShowBanner('WebGL builds are not supported on mobile devices.');
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-
-        canvas.style.width = "1280px";
-        canvas.style.height = "720px";
       }
+      //else {
+      //   // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+      //
+      //   canvas.style.width = "1280px";
+      //   canvas.style.height = "720px";
+      // }
 
       loadingBar.style.display = "block";
 
@@ -136,9 +175,14 @@
         }).then((unityInstance) => {
           unityGame = unityInstance;
           loadingBar.style.display = "none";
-          fullscreenButton.onclick = () => {
-            unityInstance.SetFullscreen(1);
-          };
+          if (canFullscreen) {
+            if (!hideFullScreenButton) {
+              fullscreenButton.style.display = "";
+            }
+            fullscreenButton.onclick = () => {
+              unityInstance.SetFullscreen(1);
+            };
+          }
         }).catch((message) => {
           alert(message);
         });
